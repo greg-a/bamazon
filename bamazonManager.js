@@ -1,5 +1,9 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+const {table} = require('table');
+ 
+let data,
+    output;
 
 var connection = mysql.createConnection({
     host: "127.0.0.1",
@@ -8,7 +12,7 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-var products = [];
+
 
 connection.connect(function (err) {
     if (err) throw err;
@@ -16,12 +20,18 @@ connection.connect(function (err) {
 });
 
 function start() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
-            products.push(res[i]);
-        }
-    });
+    // var products = [
+    //     ["part_id", "product_name", "department_name", "price", "quantity"]
+    // ];
+    // connection.query("SELECT * FROM products", function (err, res) {
+    //     if (err) throw err;
+    //     for (var i = 0; i < res.length; i++) {
+    //         var tempArray = [];
+    //         tempArray.push(res[i].id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity);
+
+    //         products.push(tempArray)
+    //     }
+    // });
     inquirer.prompt({
         name: "menu",
         type: "list",
@@ -50,12 +60,21 @@ function start() {
 }
 
 function showInv(x) {
+    var products = [
+        ["part_id", "product_name", "department_name", "price", "quantity"]
+    ];
     connection.query("SELECT * FROM products" + x, function (err, res) {
         if (err) throw err;
-        console.log("| part_id | product_name | department_name | price | quantity |\n ------------------------------------------------------------");
         for (var i = 0; i < res.length; i++) {
-            console.log("| " + res[i].id + " | " + res[i].product_name + " | " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + " |\n");
+            var tempArray = [];
+            tempArray.push(res[i].id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity);
+
+            products.push(tempArray)
         }
+
+        output = table(products);
+ 
+        console.log(output);
         start();
     })
 }
