@@ -40,7 +40,7 @@ function start() {
 }
 
 function viewDep() {
-    connection.query("SELECT departments.department_id, departments.department_name, departments.overhead_cost, SUM(products.product_sales) as product_sales FROM departments INNER JOIN products on departments.department_name = products.department_name GROUP BY departments.department_id", function(err, res) {
+    connection.query("SELECT departments.department_id, departments.department_name, departments.overhead_cost, SUM(products.product_sales) as product_sales FROM departments LEFT JOIN products on departments.department_name = products.department_name GROUP BY departments.department_id", function(err, res) {
         if (err) throw err;
 
         var products = [

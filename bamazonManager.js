@@ -1,15 +1,13 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
-const {table} = require('table');
- 
+const { table } = require('table');
+
 var connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
     password: "thisisatest",
     database: "bamazon"
 });
-
-
 
 connection.connect(function (err) {
     if (err) throw err;
@@ -23,25 +21,25 @@ function start() {
         message: "What would you like to do?",
         choices: ["View All Inventory", "View Low Inventory", "Add Inventory", "Add New Product", "Exit"]
     })
-            .then(function (answer) {
-                switch (answer.menu) {
+        .then(function (answer) {
+            switch (answer.menu) {
 
-                    case "View All Inventory":
-                        return showInv("");
+                case "View All Inventory":
+                    return showInv("");
 
-                    case "View Low Inventory":
-                        return showInv(" WHERE stock_quantity < 5");
+                case "View Low Inventory":
+                    return showInv(" WHERE stock_quantity < 5");
 
-                    case "Add Inventory":
-                        return addInv();
+                case "Add Inventory":
+                    return addInv();
 
-                    case "Add New Product":
-                        return newItem();
+                case "Add New Product":
+                    return newItem();
 
-                    default:
-                        return connection.end();
-                }
-            })
+                default:
+                    return connection.end();
+            }
+        })
 }
 
 function showInv(x) {
@@ -58,7 +56,7 @@ function showInv(x) {
         }
 
         output = table(products);
- 
+
         console.log(output);
         start();
     })
@@ -78,27 +76,30 @@ function addInv() {
                 message: "Enter the quantity you would like to add: "
             }
         ]).then(function (answer) {
-            for (var i = 0; i < products.length; i++) {
-                if (products[i].id == answer.selectProduct) {
-                    var updatedInv = parseInt(products[i].stock_quantity) + parseInt(answer.quantity);
-                    connection.query("UPDATE products SET ? WHERE ?",
-                        [
-                            {
-                                stock_quantity: updatedInv
-                            },
-                            {
-                                id: answer.selectProduct
-                            }
-                        ],
-                        function (error) {
-                            if (error) throw error;
-                            
+            connection.query("SELECT * FROM products WHERE id = ?", [answer.selectProduct], function (err, res) {
+                if (err) throw err;
+                var tempProduct = res;
+                var updatedInv = parseInt(res[0].stock_quantity) + parseInt(answer.quantity);
+
+                connection.query("UPDATE products SET ? WHERE ?",
+                    [
+                        {
+                            stock_quantity: updatedInv
+                        },
+                        {
+                            id: answer.selectProduct
                         }
-                    );
-                }
-            }
-            console.log(" ----Quantity updated!---- \n")
-            start()
+                    ],
+                    function (error) {
+                        if (error) throw error;
+                        console.log(" ----Quantity updated!---- \n");
+                        start()
+                    }
+                );
+
+
+            });
+
         })
 }
 
