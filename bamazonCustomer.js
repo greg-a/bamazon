@@ -1,7 +1,7 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
-const {table} = require('table');
- 
+const { table } = require('table');
+
 
 var connection = mysql.createConnection({
     host: "127.0.0.1",
@@ -10,10 +10,12 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
+var products = [];
+
 connection.connect(function (err) {
     if (err) throw err;
     showInv();
-  
+
 })
 
 function showInv() {
@@ -29,9 +31,8 @@ function showInv() {
 
             products.push(tempArray)
         }
-
         output = table(products);
- 
+
         console.log(output);
         purchase();
     })
@@ -51,35 +52,40 @@ function purchase() {
                 message: "Enter the quantity you would like to purchase: "
             }
         ]).then(function (answer) {
-            for (var i = 0; i < products.length; i++) {
-                if (products[i].id == answer.selectProduct) {
-                    var selectedItem = products[i];
-                    var qtyCheck = products[i].stock_quantity - answer.quantity;
-                    if (qtyCheck >= 0) {
-                        connection.query("UPDATE products SET ? WHERE ?",
-                            [
-                                {
-                                    stock_quantity: qtyCheck
-                                },
-                                {
-                                    id: answer.selectProduct
+            connection.query("SELECT * FROM products", function (err, res) {
+                for (var i = 0; i < res.length; i++) {
+                    if (res[i].id == answer.selectProduct) {
+                        var selectedItem = res[i];
+                        var qtyCheck = res[i].stock_quantity - answer.quantity;
+                        if (qtyCheck >= 0) {
+                            connection.query("UPDATE products SET ?, ? WHERE ?",
+                                [
+                                    {
+                                        stock_quantity: qtyCheck
+                                    },
+                                    {
+                                        product_sales: parseInt(answer.quantity) * parseFloat(selectedItem.price)
+                                    },
+                                    {
+                                        id: answer.selectProduct
+                                    }
+                                ],
+                                function (error) {
+                                    if (error) throw error;
+
+                                    var totalPrice = parseInt(answer.quantity) * parseFloat(selectedItem.price);
+
+                                    console.log(answer.quantity + " " + selectedItem.product_name + "(s) have been purchased for a total of " + "$" + (Math.round(totalPrice * 100) / 100).toFixed(2) + "!")
                                 }
-                            ],
-                            function (error) {                                
-                                if (error) throw error;
-
-                                var totalPrice = parseInt(answer.quantity) * parseFloat(selectedItem.price);
-
-                                console.log(answer.quantity + " " + selectedItem.product_name + "(s) have been purchased for a total of " + "$" + (Math.round(totalPrice * 100) / 100).toFixed(2) + "!")
-                            }
-                        );
-                        showInv();
-                    }
-                    else {
-                        console.log("Insufficient inventory!");
-                        purchase()
+                            );
+                            showInv();
+                        }
+                        else {
+                            console.log("Insufficient inventory!");
+                            purchase()
+                        }
                     }
                 }
-            }
+            })
         })
 }

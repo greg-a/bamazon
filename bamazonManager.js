@@ -2,9 +2,6 @@ var inquirer = require("inquirer");
 var mysql = require("mysql");
 const {table} = require('table');
  
-let data,
-    output;
-
 var connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
@@ -20,18 +17,6 @@ connection.connect(function (err) {
 });
 
 function start() {
-    // var products = [
-    //     ["part_id", "product_name", "department_name", "price", "quantity"]
-    // ];
-    // connection.query("SELECT * FROM products", function (err, res) {
-    //     if (err) throw err;
-    //     for (var i = 0; i < res.length; i++) {
-    //         var tempArray = [];
-    //         tempArray.push(res[i].id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity);
-
-    //         products.push(tempArray)
-    //     }
-    // });
     inquirer.prompt({
         name: "menu",
         type: "list",
@@ -151,7 +136,7 @@ function newItem() {
                 },
                 function (err) {
                     if (err) throw err;
-                    console.log(" ----Item has been added!---- \n");
+                    console.log("\n ----" + answer.itemName + " has been added!---- \n");
                     start();
                 }
             )

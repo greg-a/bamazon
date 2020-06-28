@@ -10,3 +10,10 @@ create table products (
     stock_quantity INTEGER not null,
     PRIMARY KEY (id)
 )
+
+create table departments (
+	department_id INTEGER AUTO_INCREMENT,
+    department_name varchar(100) NOT NULL,
+    overhead_cost DECIMAL(10,4) NOT NULL,
+    PRIMARY KEY (department_id)
+)
