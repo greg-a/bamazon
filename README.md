@@ -37,5 +37,5 @@ Inquirer prompts you every step of the way which allows for easy use.
 * MySQL.js
 * Table.js
 
-** Credits
+## Credits
 * [@greg-a](https://github.com/greg-a)
